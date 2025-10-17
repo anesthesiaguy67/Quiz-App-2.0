@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Interactive Quiz</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 700px;
+      margin: 40px auto;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+    }
+
+    .form-container,
+    .quiz-container {
+      border: 1px solid #ddd;
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 30px;
+    }
+
+    label {
+      display: block;
+      margin-top: 15px;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      box-sizing: border-box;
+    }
+
+    button {
+      margin-top: 20px;
+      padding: 10px 20px;
+    }
+
+    .question {
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    .choices button {
+      display: block;
+      margin: 10px 0;
+      width: 100%;
+      text-align: left;
+      padding: 10px;
+      font-size: 16px;
+    }
+
+    .feedback {
+      margin-top: 15px;
+      font-weight: bold;
+    }
+
+    .correct {
+      color: green;
+    }
+
+    .incorrect {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Interactive Quiz</h1>
+
+  <div class="form-container">
+    <h2>Add a Question</h2>
+    <form id="question-form">
+      <label>Question:
+        <input type="text" id="question" required>
+      </label>
+      <label>Choice A:
+        <input type="text" id="choiceA" required>
+      </label>
+      <label>Choice B:
+        <input type="text" id="choiceB" required>
+      </label>
+      <label>Choice C:
+        <input type="text" id="choiceC" required>
+      </label>
+      <label>Choice D:
+        <input type="text" id="choiceD" required>
+      </label>
+      <label>Correct Answer (A, B, C, or D):
+        <input type="text" id="correctAnswer" maxlength="1" pattern="[ABCDabcd]" required>
+      </label>
+      <button type="submit">Add Question</button>
+    </form>
+  </div>
+
+  <div class="quiz-container" style="display: none;">
+    <h2>Take the Quiz</h2>
+    <p class="question"></p>
+    <div class="choices"></div>
+    <div class="feedback" id="feedback"></div>
+    <button id="next-btn" style="display: none;">Next Question</button>
+  </div>
+
+  <script>
+    const form = document.getElementById('question-form');
+    const quizContainer = document.querySelector('.quiz-container');
+    const questionEl = document.querySelector('.question');
+    const choicesEl = document.querySelector('.choices');
+    const feedbackEl = document.getElementById('feedback');
+    const nextBtn = document.getElementById('next-btn');
+
+    let questions = [];
+    let currentQuestionIndex = 0;
+
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      const question = document.getElementById('question').value.trim();
+      const choiceA = document.getElementById('choiceA').value.trim();
+      const choiceB = document.getElementById('choiceB').value.trim();
+      const choiceC = document.getElementById('choiceC').value.trim();
+      const choiceD = document.getElementById('choiceD').value.trim();
+      const correctAnswer = document.getElementById('correctAnswer').value.trim().toUpperCase();
+
+      questions.push({
+        question,
+        choices: { A: choiceA, B: choiceB, C: choiceC, D: choiceD },
+        correct: correctAnswer
+      });
+
+      form.reset();
+      alert("Question added!");
+
+      if (questions.length === 1) {
+        showQuestion();
+      }
+    });
+
+    function showQuestion() {
+      if (currentQuestionIndex >= questions.length) {
+        questionEl.textContent = "You've finished the quiz!";
+        choicesEl.innerHTML = "";
+        feedbackEl.textContent = "";
+        nextBtn.style.display = "none";
+        return;
+      }
+
+      const current = questions[currentQuestionIndex];
+      questionEl.textContent = current.question;
+      choicesEl.innerHTML = "";
+      feedbackEl.textContent = "";
+      nextBtn.style.display = "none";
+
+      for (let key in current.choices) {
+        const btn = document.createElement("button");
+        btn.textContent = `${key}: ${current.choices[key]}`;
+        btn.onclick = () => checkAnswer(key);
+        choicesEl.appendChild(btn);
+      }
+
+      quizContainer.style.display = "block";
+    }
+
+    function checkAnswer(selected) {
+      const correct = questions[currentQuestionIndex].correct;
+
+      if (selected === correct) {
+        feedbackEl.textContent = "✅ Correct!";
+        feedbackEl.className = "feedback correct";
+      } else {
+        feedbackEl.textContent = `❌ Incorrect. Correct answer is ${correct}.`;
+        feedbackEl.className = "feedback incorrect";
+      }
+
+      // Disable all buttons
+      const buttons = choicesEl.querySelectorAll("button");
+      buttons.forEach(btn => btn.disabled = true);
+
+      nextBtn.style.display = "inline-block";
+    }
+
+    nextBtn.addEventListener("click", () => {
+      currentQuestionIndex++;
+      showQuestion();
+    });
+  </script>
+
+</body>
+</html>
